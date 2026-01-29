@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hafize 💙</title>
+<style>
+  :root{
+    --bg1:#050b18;
+    --bg2:#071a33;
+    --card:rgba(255,255,255,.07);
+    --stroke:rgba(255,255,255,.14);
+    --text:rgba(235,245,255,.92);
+    --muted:rgba(235,245,255,.70);
+
+    --blue1:#67d4ff;
+    --blue2:#2f70ff;
+    --blue3:#1540c6;
+    --cyan:#8df3ff;
+
+    --leaf1:#4ff0b0;
+    --leaf2:#0ea86f;
+
+    --shadow: rgba(0,0,0,.55);
+  }
+
+  *{ box-sizing:border-box }
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--text);
+    background:
+      radial-gradient(1100px 700px at 20% 10%, rgba(103,212,255,.18), transparent 60%),
+      radial-gradient(900px 700px at 85% 25%, rgba(47,112,255,.14), transparent 60%),
+      radial-gradient(900px 700px at 50% 95%, rgba(141,243,255,.10), transparent 60%),
+      linear-gradient(160deg, var(--bg1), var(--bg2));
+    overflow:hidden;
+  }
+
+  /* starfield */
+  .stars, .twinkles{
+    position:fixed; inset:0; pointer-events:none; overflow:hidden;
+  }
+  .star{
+    position:absolute;
+    width:2px; height:2px;
+    background: rgba(255,255,255,.9);
+    border-radius:999px;
+    opacity:.0;
+    animation: starPop 6s linear infinite;
+  }
+  @keyframes starPop{
+    0%{ opacity:0; transform: translateY(0) scale(.7) }
+    10%{ opacity:.9 }
+    60%{ opacity:.55 }
+    100%{ opacity:0; transform: translateY(14vh) scale(1.05) }
+  }
+  .twinkle{
+    position:absolute;
+    width:3px; height:3px;
+    border-radius:999px;
+    background: rgba(141,243,255,.9);
+    box-shadow: 0 0 16px rgba(141,243,255,.55);
+    opacity:.0;
+    animation: tw 3.2s ease-in-out infinite;
+  }
+  @keyframes tw{
+    0%,100%{ opacity:0; transform: scale(.7) }
+    50%{ opacity:.9; transform: scale(1.1) }
+  }
+
+  .wrap{
+    width:min(980px, 92vw);
+    padding:26px;
+    position:relative;
+    z-index:2;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--stroke);
+    border-radius:24px;
+    padding:26px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 22px 70px var(--shadow);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .glow{
+    position:absolute;
+    inset:-120px -80px auto -80px;
+    height:260px;
+    background: radial-gradient(circle at 30% 30%, rgba(103,212,255,.20), transparent 60%),
+                radial-gradient(circle at 70% 40%, rgba(47,112,255,.16), transparent 60%);
+    filter: blur(18px);
+    pointer-events:none;
+  }
+
+  .badge{
+    display:inline-flex;
+    gap:10px;
+    align-items:center;
+    padding:8px 12px;
+    border-radius:999px;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    color:var(--muted);
+    font-size:13px;
+    letter-spacing:.2px;
+  }
+
+  h1{
+    margin:14px 0 8px;
+    font-size: clamp(30px, 4.2vw, 46px);
+    letter-spacing:.2px;
+    line-height:1.12;
+  }
+  .sub{
+    margin:0;
+    color:var(--muted);
+    font-size: clamp(14px, 2vw, 18px);
+    line-height:1.75;
+    max-width:72ch;
+  }
+
+  .actions{
+    margin-top:16px;
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+
+  .btn{
+    cursor:pointer;
+    border:none;
+    padding:12px 18px;
+    border-radius:16px;
+    font-weight:700;
+    letter-spacing:.2px;
+    color:#06122a;
+    background: linear-gradient(135deg, var(--cyan), var(--blue2));
+    box-shadow: 0 14px 34px rgba(103,212,255,.28);
+    transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); box-shadow: 0 18px 44px rgba(103,212,255,.34); }
+  .btn:active{ transform: translateY(1px); opacity:.95; }
+
+  .hint{
+    margin-top:10px;
+    color: rgba(235,245,255,.65);
+    font-size:13px;
+  }
+
+  .stage{
+    margin-top:22px;
+    min-height:290px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+
+  .bouquetWrap{
+    display:none;
+    user-select:none;
+    cursor:pointer;
+    transform: translateY(18px) scale(.94);
+    opacity:0;
+    transition: opacity .55s ease, transform .55s ease;
+  }
+  .bouquetWrap.show{
+    display:block;
+    opacity:1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Bouquet art */
+  .bouquet{
+    width:360px;
+    height:270px;
+    position:relative;
+    filter: drop-shadow(0 24px 30px rgba(0,0,0,.45));
+    animation: sway 3.8s ease-in-out infinite;
+    transform-origin: 50% 90%;
+  }
+  @keyframes sway{
+    0%,100%{ transform: rotate(-1.2deg) }
+    50%{ transform: rotate(1.2deg) }
+  }
+
+  .sparkRing{
+    position:absolute;
+    left:50%; top:40px;
+    width:330px; height:220px;
+    transform: translateX(-50%);
+    border-radius:26px;
+    border:1px solid rgba(141,243,255,.18);
+    box-shadow: 0 0 40px rgba(103,212,255,.10);
+    opacity:.28;
+    animation: pulse 2.7s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes pulse{
+    0%,100%{ transform: translateX(-50%) scale(1); opacity:.20 }
+    50%{ transform: translateX(-50%) scale(1.03); opacity:.36 }
+  }
+
+  .paper{
+    position:absolute;
+    left:50%; bottom:26px;
+    width:270px; height:170px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.08));
+    border:1px solid rgba(255,255,255,.14);
+    border-radius: 22px 22px 28px 28px;
+    clip-path: polygon(9% 0, 91% 0, 100% 22%, 91% 100%, 9% 100%, 0 22%);
+    backdrop-filter: blur(10px);
+  }
+  .paperFold{
+    position:absolute;
+    left:50%; bottom:26px;
+    width:270px; height:170px;
+    transform: translateX(-50%);
+    border-radius: 22px 22px 28px 28px;
+    clip-path: polygon(50% 0, 84% 0, 100% 22%, 83% 22%);
+    background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.03));
+    opacity:.8;
+    pointer-events:none;
+  }
+
+  .ribbon{
+    position:absolute;
+    left:50%; bottom:18px;
+    width:130px; height:74px;
+    transform: translateX(-50%);
+    pointer-events:none;
+  }
+  .ribbon:before, .ribbon:after{
+    content:"";
+    position:absolute;
+    width:62px; height:46px;
+    background: linear-gradient(180deg, var(--cyan), var(--blue2));
+    border-radius: 18px 18px 18px 18px;
+    top:12px;
+    box-shadow: inset 0 -10px 16px rgba(0,0,0,.18);
+  }
+  .ribbon:before{ left:0; transform: rotate(-12deg); }
+  .ribbon:after{ right:0; transform: rotate(12deg); }
+  .knot{
+    position:absolute;
+    left:50%; top:22px;
+    width:28px; height:28px;
+    transform: translateX(-50%) rotate(45deg);
+    background: linear-gradient(180deg, var(--blue1), var(--blue2));
+    border-radius:8px;
+    box-shadow: inset 0 -8px 12px rgba(0,0,0,.18);
+  }
+  .tails{
+    position:absolute;
+    left:50%; top:44px;
+    width:120px; height:48px;
+    transform: translateX(-50%);
+    opacity:.9;
+  }
+  .tail{
+    position:absolute;
+    width:40px; height:34px;
+    background: linear-gradient(180deg, rgba(141,243,255,.95), rgba(47,112,255,.95));
+    border-radius: 10px;
+    clip-path: polygon(0 0, 100% 0, 70% 100%, 0 70%);
+    box-shadow: inset 0 -8px 12px rgba(0,0,0,.15);
+  }
+  .tail.left{ left:28px; transform: rotate(10deg) }
+  .tail.right{ right:28px; transform: scaleX(-1) rotate(10deg) }
+
+  .tulips{
+    position:absolute;
+    left:50%;
+    bottom:110px;
+    width:310px;
+    height:180px;
+    transform: translateX(-50%);
+  }
+
+  .stem{
+    position:absolute;
+    width:10px; height:122px;
+    background: linear-gradient(180deg, var(--leaf1), var(--leaf2));
+    border-radius:999px;
+    bottom:0;
+    box-shadow: inset 0 -12px 16px rgba(0,0,0,.16);
+  }
+  .leaf{
+    position:absolute;
+    width:54px; height:26px;
+    background: linear-gradient(180deg, #72ffd0, #14b67c);
+    border-radius:999px;
+    bottom:46px;
+    transform-origin: left center;
+    box-shadow: inset 0 -10px 14px rgba(0,0,0,.12);
+    opacity:.95;
+  }
+
+  .flower{
+    position:absolute;
+    width:54px; height:64px;
+    bottom:108px;
+    filter: drop-shadow(0 12px 12px rgba(0,0,0,.22));
+    animation: bloom 2.2s ease-in-out infinite;
+  }
+  @keyframes bloom{
+    0%,100%{ transform: translateY(0) scale(1) }
+    50%{ transform: translateY(-2px) scale(1.02) }
+  }
+
+  .petal{
+    position:absolute;
+    inset:0;
+    border-radius:18px;
+    clip-path: polygon(50% 0, 70% 10%, 86% 32%, 88% 54%, 72% 78%, 50% 100%, 28% 78%, 12% 54%, 14% 32%, 30% 10%);
+    background: linear-gradient(180deg, var(--blue1), var(--blue2));
+    box-shadow:
+      inset 0 -12px 18px rgba(0,0,0,.20),
+      0 0 22px rgba(103,212,255,.16);
+  }
+  .petal.inner{
+    inset:6px;
+    opacity:.9;
+    background: linear-gradient(180deg, rgba(141,243,255,.95), rgba(21,64,198,.95));
+  }
+  .shine{
+    position:absolute;
+    left:10px; top:10px;
+    width:14px; height:34px;
+    border-radius:999px;
+    background: rgba(255,255,255,.35);
+    filter: blur(.2px);
+    transform: rotate(-18deg);
+    opacity:.35;
+  }
+
+  /* Modal */
+  .modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    background: rgba(0,0,0,.62);
+    backdrop-filter: blur(10px);
+    z-index:50;
+  }
+  .modal.show{ display:flex; }
+  .modalCard{
+    width:min(780px, 96vw);
+    max-height: 86vh;
+    overflow:auto;
+    background: rgba(8,18,38,.82);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:24px;
+    box-shadow: 0 26px 90px rgba(0,0,0,.55);
+    padding:22px 20px 18px;
+    position:relative;
+  }
+  .modalTop{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  .modalTitle{
+    margin:0;
+    font-size:20px;
+    letter-spacing:.2px;
+  }
+  .xbtn{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.08);
+    color: rgba(235,245,255,.90);
+    padding:8px 10px;
+    border-radius:14px;
+    cursor:pointer;
+  }
+  .xbtn:hover{ background: rgba(255,255,255,.12); }
+
+  .msg{
+    margin:0;
+    color: rgba(235,245,255,.88);
+    line-height:1.9;
+    font-size: 15.5px;
+    white-space: pre-wrap;
+  }
+  .sig{
+    margin-top:14px;
+    color: rgba(235,245,255,.72);
+    font-style: italic;
+  }
+  .tiny{
+    margin-top:10px;
+    font-size:12px;
+    color: rgba(235,245,255,.52);
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="twinkles" id="twinkles"></div>
+
+<main class="wrap">
+  <section class="card">
+    <div class="glow"></div>
+
+    <div class="badge">💙 Hafize icin hazirlanan kucuk bir surpriz</div>
+    <h1>Hafize</h1>
+    <p class="sub">
+      Bu sayfayi senin icin yaptim
+      Once butona bas
+      Sonra mavi bukete dokun
+    </p>
+
+    <div class="actions">
+      <button class="btn" id="openBtn">Mavi Lale Buketini Ac</button>
+    </div>
+    <div class="hint" id="hint">Butona basinca buket cikacak</div>
+
+    <div class="stage">
+      <div class="bouquetWrap" id="bouquetWrap" title="Bukete tikla">
+        <div class="bouquet">
+          <div class="sparkRing"></div>
+
+          <div class="paper"></div>
+          <div class="paperFold"></div>
+
+          <div class="tulips">
+            <!-- left -->
+            <div class="stem" style="left:62px; transform: rotate(-7deg); height:122px;"></div>
+            <div class="leaf" style="left:52px; transform: rotate(-18deg);"></div>
+            <div class="flower" style="left:40px;">
+              <div class="petal"></div>
+              <div class="petal inner"></div>
+              <div class="shine"></div>
+            </div>
+
+            <!-- left-mid -->
+            <div class="stem" style="left:108px; transform: rotate(-3deg); height:128px;"></div>
+            <div class="leaf" style="left:98px; transform: rotate(10deg); bottom:52px;"></div>
+            <div class="flower" style="left:88px; bottom:112px; animation-delay:.2s">
+              <div class="petal"></div>
+              <div class="petal inner"></div>
+              <div class="shine"></div>
+            </div>
+
+            <!-- mid -->
+            <div class="stem" style="left:156px; height:138px;"></div>
+            <div class="leaf" style="left:146px; transform: rotate(16deg); bottom:56px;"></div>
+            <div class="flower" style="left:136px; bottom:118px; animation-delay:.35s">
+              <div class="petal" style="background:linear-gradient(180deg, rgba(141,243,255,.95), rgba(47,112,255,.95));"></div>
+              <div class="petal inner" style="background:linear-gradient(180deg, rgba(255,255,255,.30), rgba(21,64,198,.92)); opacity:.85"></div>
+              <div class="shine"></div>
+            </div>
+
+            <!-- right-mid -->
+            <div class="stem" style="left:204px; transform: rotate(4deg); height:128px;"></div>
+            <div class="leaf" style="left:194px; transform: rotate(-10deg); bottom:52px;"></div>
+            <div class="flower" style="left:184px; bottom:112px; animation-delay:.15s">
+              <div class="petal"></div>
+              <div class="petal inner"></div>
+              <div class="shine"></div>
+            </div>
+
+            <!-- right -->
+            <div class="stem" style="left:250px; transform: rotate(8deg); height:122px;"></div>
+            <div class="leaf" style="left:240px; transform: rotate(20deg); bottom:48px;"></div>
+            <div class="flower" style="left:230px;">
+              <div class="petal"></div>
+              <div class="petal inner"></div>
+              <div class="shine"></div>
+            </div>
+          </div>
+
+          <div class="ribbon">
+            <div class="knot"></div>
+            <div class="tails">
+              <div class="tail left"></div>
+              <div class="tail right"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tiny">bukete tiklayinca mesaj acilir</div>
+  </section>
+</main>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="modalCard">
+    <div class="modalTop">
+      <h2 class="modalTitle">Hafize</h2>
+      <button class="xbtn" id="closeBtn">Kapat</button>
+    </div>
+    <p class="msg" id="msg"></p>
+    <div class="sig" id="sig"></div>
+  </div>
+</div>
+
+<script>
+  // stars
+  const stars = document.getElementById("stars");
+  const twinkles = document.getElementById("twinkles");
+
+  function addStar(){
+    const s = document.createElement("div");
+    s.className = "star";
+    const x = Math.random()*100;
+    const y = Math.random()*100;
+    const dur = 4 + Math.random()*7;
+    const delay = Math.random()*3.5;
+
+    s.style.left = x + "vw";
+    s.style.top  = y + "vh";
+    s.style.animationDuration = dur + "s";
+    s.style.animationDelay = delay + "s";
+    stars.appendChild(s);
+
+    setTimeout(()=>s.remove(), (dur+delay)*1000);
+  }
+
+  function addTwinkle(){
+    const t = document.createElement("div");
+    t.className = "twinkle";
+    const x = Math.random()*100;
+    const y = Math.random()*100;
+    const delay = Math.random()*2.8;
+    const size = 2 + Math.random()*3;
+
+    t.style.left = x + "vw";
+    t.style.top  = y + "vh";
+    t.style.width = size + "px";
+    t.style.height = size + "px";
+    t.style.animationDelay = delay + "s";
+    twinkles.appendChild(t);
+
+    setTimeout(()=>t.remove(), 6000);
+  }
+
+  for(let i=0;i<70;i++) addStar();
+  for(let i=0;i<18;i++) addTwinkle();
+  setInterval(addStar, 220);
+  setInterval(addTwinkle, 700);
+
+  // bouquet + modal
+  const openBtn = document.getElementById("openBtn");
+  const bouquetWrap = document.getElementById("bouquetWrap");
+  const hint = document.getElementById("hint");
+
+  const modal = document.getElementById("modal");
+  const closeBtn = document.getElementById("closeBtn");
+  const msgEl = document.getElementById("msg");
+  const sigEl = document.getElementById("sig");
+
+  const fullMessage =
+`Hafize
+
+Hayatima girdigin gunden beri icimde baska bir huzur var
+Sanki her sey daha sakin daha guvenli daha anlamli oldu
+
+Seni sevmek benim icin bir an degil
+Her gun yeniden baslayan bir bag
+Her gun yeniden secilen bir duygu
+
+Hayatima girdigin icin tesekkur ederim
+Beni oldugum gibi gordugun icin
+Beni yormadan sevdigin icin
+Bazen tek bir bakisinla bile icimi rahatlattigin icin
+
+Ben her zaman yanindayim
+Gulerken de yorulurken de
+Sessiz kaldiginda da
+Dunya ustune geliyormus gibi hissettiginde de
+
+Elini tuttugumda sadece elini tutmuyorum
+Kalbini de tutuyorum
+Ve onu incitmemek icin elimden gelenin fazlasini yapacagim
+
+Seninle gelecegi dusunmek bana korku degil heyecan veriyor
+Cunku ben yaninda iyi bir insan olmak istiyorum
+Sana iyi gelmek istiyorum
+Seni her gun biraz daha mutlu etmek istiyorum
+
+Iyi ki varsın Sevgilim
+Iyi ki benimsin
+Seni cok seviyorum`;
+
+  const signature = "her zaman yaninda olan kalbin";
+
+  let typed = false;
+
+  function typeText(text, el, speed=16){
+    el.textContent = "";
+    let i = 0;
+    const tick = () => {
+      if(i <= text.length){
+        el.textContent = text.slice(0, i);
+        i++;
+        requestAnimationFrame(() => setTimeout(tick, speed));
+      }
+    };
+    tick();
+  }
+
+  openBtn.addEventListener("click", () => {
+    bouquetWrap.classList.add("show");
+    hint.textContent = "Simdi bukete tikla";
+  });
+
+  bouquetWrap.addEventListener("click", () => {
+    modal.classList.add("show");
+    if(!typed){
+      typeText(fullMessage, msgEl, 14);
+      sigEl.textContent = signature;
+      typed = true;
+    }
+  });
+
+  function closeModal(){
+    modal.classList.remove("show");
+  }
+  closeBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if(e.target === modal) closeModal(); });
+  document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeModal(); });
+</script>
+
+</body>
+</html>
